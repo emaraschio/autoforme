@@ -31,7 +31,7 @@ module AutoForme
       @objs = objs
       @opts = opts
     end
-    
+
     def h(s)
       action.h(s)
     end
@@ -48,6 +48,7 @@ module AutoForme
         html << "<th>#{h action.column_label_for(type, request, model, column)}</th>"
       end
       html << "<th>Show</th>" if show = model.supported_action?(:show, request)
+      html << "<th>SalesForce</th>" if salesforce = model.supported_action?(:salesforce, request)
       html << "<th>Edit</th>" if edit = model.supported_action?(:edit, request)
       html << "<th>Delete</th>" if delete = model.supported_action?(:delete, request)
       html << "</tr></thead>"
@@ -61,6 +62,7 @@ module AutoForme
           html << "<td>#{h val}</td>"
         end
         html << "<td><a href=\"#{action.url_for("show/#{model.primary_key_value(obj)}")}\" class=\"btn btn-mini btn-info\">Show</a></td>" if show
+        html << "<td><a onclick=\"javascript:return confirm('Are you sure you want to do this action?')\" href=\"/admin/saleforce?id=#{model.primary_key_value(obj)}\" class=\"btn btn-mini btn-primary\">Push</a></td>" if salesforce
         html << "<td><a href=\"#{action.url_for("edit/#{model.primary_key_value(obj)}")}\" class=\"btn btn-mini btn-primary\">Edit</a></td>" if edit
         html << "<td><a href=\"#{action.url_for("delete/#{model.primary_key_value(obj)}")}\" class=\"btn btn-mini btn-danger\">Delete</a></td>" if delete
         html << "</tr>"
