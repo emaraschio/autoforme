@@ -29,13 +29,13 @@ module AutoForme
     attr_reader :output_filename
 
     # Array of strings for all action types currently supported
-    ALL_SUPPORTED_ACTIONS = %w'new create show edit update delete destroy browse search mtm_edit mtm_update association_links autocomplete'.freeze
+    ALL_SUPPORTED_ACTIONS = %w'my_action new create show edit update delete destroy browse search mtm_edit mtm_update association_links autocomplete'.freeze
 
     # Map of regular type symbols to normalized type symbols
     NORMALIZED_ACTION_MAP = {:create=>:new, :update=>:edit, :destroy=>:delete, :mtm_update=>:mtm_edit}
 
     # Map of type symbols to HTML titles
-    TITLE_MAP = {:new=>'New', :show=>'Show', :edit=>'Edit', :delete=>'Delete', :browse=>'Browse', :search=>'Search', :mtm_edit=>'Many To Many Edit'}
+    TITLE_MAP = {:my_action=>'My Action', :new=>'New', :show=>'Show', :edit=>'Edit', :delete=>'Delete', :browse=>'Browse', :search=>'Search', :mtm_edit=>'Many To Many Edit'}
 
     # Creates a new action for the model and request.  This action is not
     # usable unless supported? is called first and it returns true.
@@ -66,6 +66,8 @@ module AutoForme
         end
 
         @title = "#{model.class_name} - #{TITLE_MAP[type]}"
+      when :my_action
+        return false unless model.supported_action?(type, request)
       when :mtm_update
         return false unless request.id && (assoc = request.params['association']) && model.supported_mtm_update?(assoc, request)
         @params_association = assoc.to_sym
@@ -114,7 +116,7 @@ module AutoForme
       "#{request.path}#{model.framework.prefix}/#{page}"
     end
 
-    # A path for the given page for the same model. 
+    # A path for the given page for the same model.
     def url_for(page)
       base_url_for("#{model.link}/#{page}")
     end
@@ -258,7 +260,7 @@ module AutoForme
         end
       end
     end
-    
+
     # Handle the new action by always showing the new form.
     def handle_new
       obj = model.new(request.params[model.link], request)
@@ -555,7 +557,7 @@ module AutoForme
 
     # HTML fragment for the list of association links, allowing quick access to associated models and objects.
     def association_link_list(obj)
-      assocs = model.association_links_for(type, request) 
+      assocs = model.association_links_for(type, request)
       return if assocs.empty?
       read_only = type == :show
       t = '<h3 class="associated_records_header">Associated Records</h3>'
